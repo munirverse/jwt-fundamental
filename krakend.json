@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "KrakenD - API Gateway",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "endpoints": [
+    {
+      "endpoint": "/",
+      "method": "GET",
+      "output_encoding": "json",
+      "input_headers": ["x-jwt-username", "x-jwt-iat", "x-jwt-sub"],
+      "backend": [
+        {
+          "host": ["http://localhost:3000"],
+          "url_pattern": "/profiles2",
+          "encoding": "json",
+          "method": "GET",
+          "extra_config": {
+            "backend/http": {
+              "return_error_details": "backend_alias"
+            }
+          }
+        }
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "HS256",
+          "jwk_local_path": "./jwk.json",
+          "disable_jwk_security": true,
+          "operation_debug": true,
+          "propagate_claims": [
+            ["name", "x-jwt-username"],
+            ["iat", "x-jwt-iat"],
+            ["sub", "x-jwt-sub"]
+          ]
+        }
+      }
+    }
+  ]
+}
